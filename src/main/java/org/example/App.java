@@ -19,6 +19,7 @@ import org.json.simple.parser.JSONParser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Hello world!
@@ -26,11 +27,12 @@ import java.util.List;
  */
 public class App 
 {
-    private static String client_id = "669630848184-mg9huh7m26kpcne98bprdnfauggg5m6b.apps.googleusercontent.com";
-    private static String client_secret  = "J7i2tZf_1AImzdvk7Uq1-2DU";
+    private static String client_id = "";
+    private static String client_secret  = "";
     private static String authCode =null;
     public static void main( String[] args ) throws IOException, URISyntaxException, InterruptedException, Exception {
-
+        //populate client id and secret from .conf
+        ReadPropertyFile();
         if( args.length != 1 )
         {
             print("Invalid argument(s)");
@@ -58,7 +60,6 @@ public class App
                 try {
                     byte[] bytes = new BufferedInputStream(new FileInputStream(homePath + "/.refresh_token")).readAllBytes();
                     String s = new String(bytes);
-                    System.out.println(s);
                     String argument = args[0];
                     if(argument.charAt(0)== '/')
                       argument =  argument.substring(1, argument.length());
@@ -147,4 +148,22 @@ public class App
             e.printStackTrace();
         }
     }
+    public static void ReadPropertyFile()
+    {
+        Properties prop = new Properties();
+        File f = new File(App.class.getResource("/config.properties").getFile());
+        try {
+            FileInputStream fis  = new FileInputStream(f);
+            prop.load(fis);
+            client_id = prop.getProperty("client_id");
+            client_secret = prop.getProperty("client_secret");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
+
