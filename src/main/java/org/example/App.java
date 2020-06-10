@@ -14,6 +14,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 //import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class App
     public static void main( String[] args ) throws IOException, URISyntaxException, InterruptedException, Exception {
         //populate client id and secret from .conf
         ReadPropertyFile();
-        if( args.length != 1 )
+        if( args.length == 0 )
         {
             print("Invalid argument(s)");
             return;
@@ -47,6 +48,13 @@ public class App
 
         }
         else {
+            String filePath = args[0];
+            if(filePath.charAt(0) =='/')
+                filePath= filePath.substring(1, filePath.length());
+            if(filePath.length()!=0 && filePath.charAt(filePath.length()-1)=='/')
+                filePath= filePath.substring(0, filePath.length()-1);
+            String actualFilePath = System.getProperty("user.dir")+File.separator+filePath;
+            System.out.println("actualFilePath: "+actualFilePath);
             String homePath = System.getProperty("user.home");
             File refreshTokenFile = new File(homePath + "/.refresh_token");
             boolean b = refreshTokenFile.exists();
@@ -60,11 +68,14 @@ public class App
                 try {
                     byte[] bytes = new BufferedInputStream(new FileInputStream(homePath + "/.refresh_token")).readAllBytes();
                     String s = new String(bytes);
-                    String argument = args[0];
-                    if(argument.charAt(0)== '/')
-                      argument =  argument.substring(1, argument.length());
-                    String filePath = homePath+"/"+argument;
-                    print("File path: "+ filePath);
+                    File f = new File(actualFilePath);
+                    if(f.exists() ==false || f.isFile() == false)
+                    {
+                        print("Cannot find file.");
+                        System.exit(0);
+                    }
+                    //upload file
+                    new UploadFile().getAccessToken(s,client_id, client_secret).UploadFileToDrive(f);
                 }catch (IOException e)
                 {
                     print("Error in fetching token, run command, 'godrive auth'");
@@ -97,7 +108,6 @@ public class App
          }
          else
          {
-             System.out.println("Got auth code: "+LocalServer.authCode);
              authCode = LocalServer.authCode;
          }
     }
@@ -125,7 +135,6 @@ public class App
             }
             String getResponseString = "";
             getResponseString = sb.toString();
-            System.out.println("Auth resp string: " + getResponseString);
             JSONObject jsonObject = new JSONObject();
             JSONParser jsonParser = new JSONParser();
             jsonObject = (JSONObject) jsonParser.parse(getResponseString);
@@ -136,13 +145,14 @@ public class App
             f.createNewFile();
             FileOutputStream fos = new FileOutputStream(homePath + "/.refresh_token");
             fos.write(refresh_token.getBytes());
+            print("Authentication successful");
         }
         catch (IOException e )
         {
             System.out.println("IOException, " );
             e.printStackTrace();
         }
-        catch (Exception e)
+        catch (ParseException e)
         {
             System.out.println("Can't get tokens, " );
             e.printStackTrace();
@@ -151,10 +161,9 @@ public class App
     public static void ReadPropertyFile()
     {
         Properties prop = new Properties();
-        File f = new File(App.class.getResource("/config.properties").getFile());
+        InputStream f = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties");
         try {
-            FileInputStream fis  = new FileInputStream(f);
-            prop.load(fis);
+            prop.load(f);
             client_id = prop.getProperty("client_id");
             client_secret = prop.getProperty("client_secret");
         } catch (FileNotFoundException e) {
