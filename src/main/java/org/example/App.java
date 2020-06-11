@@ -29,7 +29,7 @@ import java.util.Properties;
 public class App 
 {
     private static String client_id = "";
-    private static String client_secret  = "";
+    public static String serverURL= "https://godriveserver.herokuapp.com";
     private static String authCode =null;
     public static void main( String[] args ) throws IOException, URISyntaxException, InterruptedException, Exception {
         //populate client id and secret from .conf
@@ -75,7 +75,7 @@ public class App
                         System.exit(0);
                     }
                     //upload file
-                    new UploadFile().getAccessToken(s,client_id, client_secret).UploadFileToDrive(f);
+                    new UploadFile().getAccessToken(s).UploadFileToDrive(f);
                 }catch (IOException e)
                 {
                     print("Error in fetching token, run command, 'godrive auth'");
@@ -110,19 +110,15 @@ public class App
          {
              authCode = LocalServer.authCode;
          }
+
     }
     public static void createRefreshTokenFile() {
         try {
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost("https://oauth2.googleapis.com/token");
+            HttpPost httpPost = new HttpPost(serverURL+"/getRefreshToken");
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
             List<NameValuePair> nameValuePairs = new ArrayList<>();
-            nameValuePairs.add(new BasicNameValuePair("client_id", client_id));
-            nameValuePairs.add(new BasicNameValuePair("client_secret", client_secret));
             nameValuePairs.add(new BasicNameValuePair("code", authCode));
-            nameValuePairs.add(new BasicNameValuePair("grant_type", "authorization_code"));
-            nameValuePairs.add(new BasicNameValuePair("redirect_uri", "http://localhost:7341/code"));
-            //  System.out.println(nameValuePairs.toString());
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             HttpResponse httpResponse = httpClient.execute(httpPost);
             BufferedReader rd = new BufferedReader(new InputStreamReader(
@@ -133,13 +129,12 @@ public class App
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-            String getResponseString = "";
-            getResponseString = sb.toString();
-            JSONObject jsonObject = new JSONObject();
-            JSONParser jsonParser = new JSONParser();
-            jsonObject = (JSONObject) jsonParser.parse(getResponseString);
-            String access_token = jsonObject.get("access_token").toString();
-            String refresh_token = jsonObject.get("refresh_token").toString();
+            if(sb.toString().equals("400"))
+            {
+                print("Error occurred");
+                return;
+            }
+            String refresh_token = sb.toString();
             String homePath = System.getProperty("user.home");
             File f = new File(homePath + "/.refresh_token");
             f.createNewFile();
@@ -152,11 +147,11 @@ public class App
             System.out.println("IOException, " );
             e.printStackTrace();
         }
-        catch (ParseException e)
+       /* catch (ParseException e)
         {
             System.out.println("Can't get tokens, " );
             e.printStackTrace();
-        }
+        }*/
     }
     public static void ReadPropertyFile()
     {
@@ -165,7 +160,6 @@ public class App
         try {
             prop.load(f);
             client_id = prop.getProperty("client_id");
-            client_secret = prop.getProperty("client_secret");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

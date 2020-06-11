@@ -30,18 +30,14 @@ import java.nio.file.*;
 
 public class UploadFile {
     String accessToken = "";
-    public UploadFile getAccessToken(String refreshToken, String clientId, String clientSecret)
+    public UploadFile getAccessToken(String refreshToken)
     {
         try {
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost("https://oauth2.googleapis.com/token");
+            HttpPost httpPost = new HttpPost(App.serverURL+"/getAccessToken");
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
             List<NameValuePair> nameValuePairs = new ArrayList<>();
-            nameValuePairs.add(new BasicNameValuePair("client_id", clientId));
-            nameValuePairs.add(new BasicNameValuePair("client_secret", clientSecret));
             nameValuePairs.add(new BasicNameValuePair("refresh_token", refreshToken));
-            nameValuePairs.add(new BasicNameValuePair("grant_type", "refresh_token"));
-            //  System.out.println(nameValuePairs.toString());
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             HttpResponse httpResponse = httpClient.execute(httpPost);
             BufferedReader rd = new BufferedReader(new InputStreamReader(
@@ -54,11 +50,14 @@ public class UploadFile {
             }
             String getResponseString = "";
             getResponseString = sb.toString();
-            accessToken = ((JSONObject) (new JSONParser().parse(getResponseString))).get("access_token").toString();
+            if(getResponseString.equals("400"))
+            {
+                System.out.println("Error occured");
+                System.exit(0);
+            }
+            accessToken = getResponseString;
         }
-        catch (ParseException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (ClientProtocolException e) {
             e.printStackTrace();
