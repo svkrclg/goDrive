@@ -54,7 +54,7 @@ public class App
             if(filePath.length()!=0 && filePath.charAt(filePath.length()-1)=='/')
                 filePath= filePath.substring(0, filePath.length()-1);
             String actualFilePath = System.getProperty("user.dir")+File.separator+filePath;
-            System.out.println("actualFilePath: "+actualFilePath);
+            System.out.println("FilePath: "+actualFilePath);
             String homePath = System.getProperty("user.home");
             File refreshTokenFile = new File(homePath + "/.refresh_token");
             boolean b = refreshTokenFile.exists();
@@ -109,6 +109,7 @@ public class App
          else
          {
              authCode = LocalServer.authCode;
+             System.out.print("Auth code received.\n Fetching Refresh token...");
          }
 
     }
@@ -131,7 +132,7 @@ public class App
             }
             if(sb.toString().equals("400"))
             {
-                print("Error occurred");
+                System.out.print("\033[2K"+"Error occurred in fetching refresh token\n");
                 return;
             }
             String refresh_token = sb.toString();
@@ -140,18 +141,13 @@ public class App
             f.createNewFile();
             FileOutputStream fos = new FileOutputStream(homePath + "/.refresh_token");
             fos.write(refresh_token.getBytes());
-            print("Authentication successful");
+
+            System.out.print("\033[2K"+"\rRefresh Token fetching successful.\n Authentication successful.\n");
         }
         catch (IOException e )
         {
-            System.out.println("IOException, " );
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         }
-       /* catch (ParseException e)
-        {
-            System.out.println("Can't get tokens, " );
-            e.printStackTrace();
-        }*/
     }
     public static void ReadPropertyFile()
     {
@@ -161,12 +157,11 @@ public class App
             prop.load(f);
             client_id = prop.getProperty("client_id");
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         }
 
     }
-
 }
 

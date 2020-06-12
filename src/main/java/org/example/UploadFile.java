@@ -33,6 +33,26 @@ public class UploadFile {
     public UploadFile getAccessToken(String refreshToken)
     {
         try {
+            Thread t= new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String anim= "|/-\\";
+                    int x=0;
+                    while(true){
+                        String data = "\r" + anim.charAt(x % anim.length()) + " Fetching access token.";
+                        try {
+                            System.out.write(data.getBytes());
+                            Thread.sleep(100);
+                        } catch (IOException e) {
+                            System.out.print("\033[2K"+"\rProblem Occurred.\n");
+                        } catch (InterruptedException e) {
+                            return;
+                        }
+                        x++;
+                    }
+                }
+            });
+            t.start();
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost httpPost = new HttpPost(App.serverURL+"/getAccessToken");
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -50,19 +70,22 @@ public class UploadFile {
             }
             String getResponseString = "";
             getResponseString = sb.toString();
+            //stop thread
+            t.interrupt();
             if(getResponseString.equals("400"))
             {
-                System.out.println("Error occured");
+                System.out.write(new String("\rError occurred").getBytes());
                 System.exit(0);
             }
+            System.out.write(new String("\rAccess token fetching successful.\n").getBytes());
             accessToken = getResponseString;
         }
         catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         }
         return this;
     }
@@ -70,7 +93,8 @@ public class UploadFile {
     public void UploadFileToDrive(File f)
     {
         try {
-             URL url = new URL("https://www.googleapis.com/upload/drive/v2/files?uploadType=multipart");
+            System.out.print(new String("Sending metadata..."));
+            URL url = new URL("https://www.googleapis.com/upload/drive/v2/files?uploadType=multipart");
             HttpURLConnection  conn = (HttpURLConnection)url.openConnection() ;
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
@@ -95,16 +119,23 @@ public class UploadFile {
                     new BufferedWriter(new OutputStreamWriter(outputStreamToRequestBody));
             writer.write(body);
             writer.flush();
-            FileInputStream inputStreamToLogFile = new FileInputStream(f);
+            System.out.print("\033[2K"+"\rMetadata sent. \n");
+            FileInputStream inputStreamToFile = new FileInputStream(f);
+            long l = f.length();
             int bytesRead;
+            long totalBytesRead=0;
             byte[] dataBuffer = new byte[1024];
-            while((bytesRead = inputStreamToLogFile.read(dataBuffer)) != -1) {
+            while((bytesRead = inputStreamToFile.read(dataBuffer)) != -1) {
+                totalBytesRead+=bytesRead;
                 outputStreamToRequestBody.write(dataBuffer, 0, bytesRead);
+                int percentage = (int)(totalBytesRead/l) * 100;
+                System.out.print("\033[2K"+"\r"+percentage+" Uploading...");
             }
             writer.write("\n"+
                     "--"+boundary+"--");
             writer.flush();
             writer.close();
+            System.out.print("\033[2K"+"\rUploaded.\nWaiting for response...");
             BufferedReader httpResponseReader =
                     new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String lineRead;
@@ -116,21 +147,21 @@ public class UploadFile {
             JSONObject job= (JSONObject) parser.parse(result.toString());
             String id = job.get("id").toString();
             String copiedUrl = job.get("alternateLink").toString();
-            System.out.println("File uploaded, URL: "+copiedUrl);
+            System.out.print("\rFile uploaded, URL: "+copiedUrl+"\n");
             //copy url to clipboard
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(copiedUrl), null);
             //changing permission to all
+            System.out.print("\rChanging permission...");
             ChangePermissionToAll(id);
 
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         } catch (ParseException e) {
-            System.out.println("Problem Occurred");
-            e.printStackTrace();
+            System.out.println("\033[2K"+"\rProblem Occurred");
         }
     }
     public void ChangePermissionToAll(String fileId)
@@ -161,16 +192,15 @@ public class UploadFile {
             String id = permission.get("id").toString();
             if(id.equals("anyone"))
             {
-                System.out.println("Permission changed, anyone with link can view the file");
+                System.out.print("\033[2K"+"\rPermission changed, anyone with link can view the file.\n");
                 System.exit(0);
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.print("\033[2K"+"\rProblem Occurred.\n");
         } catch (ParseException e) {
-            System.out.println("Problem occurred in changing permission");
-            e.printStackTrace();
+            System.out.println("\033[2K"+"\rProblem occurred in changing permission.\n");
         }
     }
 }
