@@ -25,6 +25,7 @@ Now let's talk about workflow,
 ### 1) ```godrive auth```
 Used to authenticate the user through Oauth consent flow.
 - The URL for this request is :
+
 ```https://accounts.google.com/o/oauth2/v2/auth?scope=<OUR APPLICATION SCOPE>&access_type=offline&include_granted_scopes=true&response_type=code&state=state_parameter&redirect_uri=<REDIRECT_URI>&client_id=<OUR APPLICATION CLIENT_ID>```
 
 To have read and write permission to Google drive the **Scope** is ```https://www.googleapis.com/auth/drive```
@@ -56,7 +57,7 @@ The response is in JSON:
 Since this request require client_secret, it is not intiated by user directly, but using our Server, after user hits ```<serverurl>/getRefreshToken``` from application with ```auth_code``` as paramater value of POST request.
 
 <img src="https://github.com/svkrclg/goDrive/blob/master/auth.png" height= "500" width="500">
-![Auth flow diagam](https://github.com/svkrclg/goDrive/blob/master/auth.png)
+
 In the end it creates file ```.refresh_token``` with refresh_token String, in user's home directory.
 ### 1) ```godrive <filepath>```
 Used to upload a new file to Google drive using,
