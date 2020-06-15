@@ -22,7 +22,7 @@ The procedure of creating request for obtaining token is available in [Google OA
 Now let's talk about workflow,
 
 **The CLI currently offer's have two arguments:**
-### 1) ```godrive auth```
+### 1) ```godrive --auth```
 Used to authenticate the user through Oauth consent flow.
 - The URL for this request is :
 
@@ -59,7 +59,7 @@ Since this request require client_secret, it is not intiated by user directly, b
 <img src="https://github.com/svkrclg/goDrive/blob/master/auth.png" height= "500" width="500">
 
 In the end it creates file ```.refresh_token``` with refresh_token String, in user's home directory.
-### 1) ```godrive <filepath>```
+### 1) ```godrive --upload <filepath>```
 Used to upload a new file to Google drive using,
 The API request need Access token in the POST request, hence send the request to get access token:
 ```
@@ -126,9 +126,9 @@ Response recieved from OAuth:
  
  ##Usage
 - For authentication
- > godrive auth
+ > godrive -a
 - For uploading
- > godrive \<filepath\>
+ > godrive -u \<filepath\>
 
 
 <img src="https://github.com/svkrclg/goDrive/blob/master/help.png">
