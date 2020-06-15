@@ -4,7 +4,7 @@ A command line tool to upload files to your Google drive account.
 ## What it does?
 It uses the Google [OAuth 2.0](developers.google.com/identity/protocols/oauth2) to obtain the end user's Access Token and send a POST request to [Google drive API](https://developers.google.com/drive). By default it also changes the permission of the uploaded to make it accessible to everyone with the link.
 
-##The Workflow
+## The Workflow
 
 Let us first know some of the important terms involved in OAuth 2.0.
 - **Client Id** : This is public identifier of each application registered for enabling OAuth 2.0 functionality in Google API console.
