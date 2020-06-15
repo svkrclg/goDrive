@@ -46,7 +46,7 @@ public class App
             {
                 AuthenticationArgument();
             }
-            if(cmd.hasOption("u"))
+            else if(cmd.hasOption("u"))
             {
                 String s ="";
                 for(int i=1;i<args.length;i++)
@@ -56,7 +56,7 @@ public class App
                     s+=args[i]+" ";
                 FileUploadArgument(s);
             }
-            if(cmd.hasOption("h"))
+            else if(cmd.hasOption("h"))
             {
                 throw new ParseException("GoDrive CLI");
             }
