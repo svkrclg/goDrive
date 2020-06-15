@@ -119,6 +119,7 @@ Response recieved from OAuth:
  - run command ```mvn package```
  - Move the ```goDrive.jar``` file (inside directory /target) to ```home``` directory.
  - Move the ```.script.sh``` file (present in root folder)to ```home``` directory.
+ - Append the code ```source .script.sh``` at the end of ```.bashrc``` present in home directory.
  - Open terminal, and **ENJOY**:+1: 
  
  <img src="https://github.com/svkrclg/goDrive/blob/master/output.png">
@@ -128,6 +129,9 @@ Response recieved from OAuth:
  > godrive auth
 - For uploading
  > godrive \<filepath\>
+
+
+<img src="https://github.com/svkrclg/goDrive/blob/master/help.png">
  
 
  *\*goDrive server is hosted in Heroku platform, which contain the client_id & client_secret.* 

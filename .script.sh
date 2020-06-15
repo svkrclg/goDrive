@@ -1,4 +1,4 @@
 #!/bin/bash
 function godrive() {
-java -jar ~/goDrive.jar $1
+java -jar ~/goDrive.jar $@
 }
